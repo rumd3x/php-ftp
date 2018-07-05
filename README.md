@@ -1,2 +1,2 @@
 # php-ftp
-Nice and easy to use FTP utility.
+A Nice and easy to use PHP utility for handling Files over FTP.
