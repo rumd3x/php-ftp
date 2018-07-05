@@ -1,0 +1,27 @@
+{
+    "name": "rumd3x/php-ftp",
+    "description": "Utilidade para conexão FTP",
+    "license": "MIT",
+    "keywords": [
+        "ftp", "client", "php-ftp", "php", "rumd3x"
+    ],
+    "authors": [
+        {
+            "name": "Edmur Cardoso",
+            "email": "edmurcardoso@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Rumd3x\\Ftp\\": "src/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "master"
+        }
+    }
+}
