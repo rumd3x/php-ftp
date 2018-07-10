@@ -12,6 +12,7 @@ class Ftp {
     private $user;
     private $pass;
     private $port = 21;
+	private $secure = false;
 
     private $stream;
     private $connected = false;
@@ -28,25 +29,23 @@ class Ftp {
                 $this->host = $data['host'];
                 $this->user = $data['user'];
                 $this->pass = $data['pass'];
+				$this->secure = $data['ssl'];
             } else {
                 $this->parseConnectionDetails($args[0]);
             }
         } elseif (func_num_args() > 0) {
             throw new Exception("Argumentos passados inválidos");
         }
+		
         if (!empty($this->host)) {
-            $this->stream = @ftp_connect($this->host, $this->port);
+            $this->connect();
         } else {
             throw new Exception("Host inválido: \"{$this->host}\"");
-        }
-
-        if (empty($this->stream)) {
-            throw new Exception("Não foi possível conectar ao host \"{$this->host}\"");
-        }
+		}
 
         if (!empty($this->user)) {
             $this->pass = empty($this->pass) ? '' : $this->pass;
-            $this->connect();
+            $this->login();
         }
     }
 
@@ -56,7 +55,9 @@ class Ftp {
 
     private function parseConnectionDetails(Array $args) {
         foreach($args as $arg) {
-            if (empty($this->host) && filter_var(gethostbyname($arg), FILTER_VALIDATE_IP)) {
+            if (strtoupper($arg) === "SSL") {
+				$this->setSecure();
+			} elseif (empty($this->host) && filter_var(gethostbyname($arg), FILTER_VALIDATE_IP)) {
                 $this->host = $arg; 
             } elseif (filter_var($arg, FILTER_VALIDATE_INT)) {
                 $this->port = $arg;
@@ -67,8 +68,21 @@ class Ftp {
             }
         }
     }
+	
+	public function connect() {
+		if ($this->isSecure()) {
+			$this->stream = @ftp_ssl_connect($this->host, $this->port);
+		} else {
+			$this->stream = @ftp_connect($this->host, $this->port);
+		}		
+		
+		if (empty($this->stream)) {
+			$is_ssl = $this->isSecure() ? 'com' : 'sem';
+            throw new Exception("Não foi possível conectar ao host {$is_ssl} SSL \"{$this->host}\" usando a porta {$this->port}");
+        }
+	}
 
-    public function connect() {
+    public function login() {
         $this->connected = @ftp_login($this->stream, $this->user, $this->pass);
         if (!$this->connected) {
             throw new Exception("Usuário ou senha inválidos");
@@ -84,6 +98,7 @@ class Ftp {
     public function getFiles($dir = ".") {
         if (!$this->isConnected()) {
             $this->connect();
+            $this->login();
         }
 
         if (@!ftp_chdir($this->getStream(), $dir)) {
@@ -120,6 +135,7 @@ class Ftp {
     public function up() {
         if (!$this->isConnected()) {
             $this->connect();
+            $this->login();
         }
 
         @ftp_cdup($this->getStream());
@@ -129,6 +145,7 @@ class Ftp {
     public function dir($dir) {
         if (!$this->isConnected()) {
             $this->connect();
+            $this->login();
         }
 
         @ftp_chdir($this->getStream(), $dir);
@@ -188,6 +205,7 @@ class Ftp {
 	public function getStream(){
         if (!$this->isConnected()) {
             $this->connect();
+            $this->login();
         }
 		return $this->stream;
 	}
@@ -195,6 +213,14 @@ class Ftp {
 	public function setStream($stream){
         $this->stream = $stream;
         return $this;
+	}
+	
+	public function setSecure($secure = true) {
+		$this->secure = $secure;
+	}
+	
+	public function isSecure() {
+		return boolval($this->secure);
 	}
 
 }
