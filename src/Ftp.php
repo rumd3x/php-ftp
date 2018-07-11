@@ -80,6 +80,7 @@ class Ftp {
 			$is_ssl = $this->isSecure() ? 'com' : 'sem';
             throw new Exception("Não foi possível conectar ao host {$is_ssl} SSL \"{$this->host}\" usando a porta {$this->port}");
         }
+		return $this;
 	}
 
     public function login() {
