@@ -6,9 +6,9 @@ A Nice and easy to use PHP utility for handling Files over FTP.
 To install via composer add this to your composer.json
 ```json
 "minimum-stability": "dev",
-	"repositories": [
-		{ "type": "git", "url": "https://github.com/rumd3x/php-ftp.git" }
-	]
+"repositories": [
+	{ "type": "git", "url": "https://github.com/rumd3x/php-ftp.git" }
+]
 ```
 And then run
 ```sh
