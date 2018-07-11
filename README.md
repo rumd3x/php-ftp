@@ -1,6 +1,7 @@
 # php-ftp
 A Nice and easy to use PHP utility for handling Files over FTP.
 
+
 ## Installation
 To install via composer add this to your composer.json
 ```json
@@ -17,8 +18,11 @@ And then run
 ## Usage
 Connecting to Server
 
+
 The constructor takes any amount of arguments, in any order. But you have to specify the username first, and then the password.
+
 You can specify the port as an integer, the default is 21.
+
 You can specify if the connection uses SSL or not by passing an extra argument with the string 'SSL'.
 
 You can also not specify any args and connect later.
