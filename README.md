@@ -27,11 +27,15 @@ You can also not specify any args and connect later.
 ```php
 $ftp = new Rumd3x\Ftp('host.example.com', 'user', 'pass', 21);
 $conn1 = $ftp->isConnected(); 
+
 print_r($conn1); // Returns a boolean;
+
 //or
+
 $ftp2 = new Rumd3x\Ftp();
 $conn2 = $ftp2->setHost('192.168.1.123')->setSecure()->setPort(666)->connect()
 ->setUser('test')->setPass('secret')->login()->isConnected();
+
 print_r($conn2); // Returns a boolean;
 ```
 
