@@ -91,6 +91,14 @@ class Ftp {
         ftp_pasv($this->stream, true);
         return $this;
     }
+	
+	public function keepAlive() {
+		$currentFolder = $this->currentFolder();
+		$this->connect();
+		$this->login();
+		$this->dir($currentFolder);
+		return $this;
+	}
 
     public function isConnected() {
         return $this->connected;
