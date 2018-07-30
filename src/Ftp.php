@@ -50,7 +50,7 @@ class Ftp {
     }
 
     public function __destruct() {
-        ftp_close($this->getStream());
+        $this->disconnect();
     }
 
     private function parseConnectionDetails(Array $args) {
@@ -75,11 +75,11 @@ class Ftp {
 		} else {
 			$this->stream = @ftp_connect($this->host, $this->port);
 		}		
-		
+
 		if (empty($this->stream)) {
 			$is_ssl = $this->isSecure() ? 'com' : 'sem';
-            throw new Exception("Não foi possível conectar ao host {$is_ssl} SSL \"{$this->host}\" usando a porta {$this->port}");
-        }
+	    throw new Exception("Não foi possível conectar ao host {$is_ssl} SSL \"{$this->host}\" usando a porta {$this->port}");
+	}
 		return $this;
 	}
 
@@ -92,8 +92,13 @@ class Ftp {
         return $this;
     }
 	
+	public function disconnect() {
+		ftp_close($this->getStream());
+	}
+	
 	public function keepAlive() {
 		$currentFolder = $this->currentFolder();
+		$this->disconnect();
 		$this->connect();
 		$this->login();
 		$this->dir($currentFolder);
