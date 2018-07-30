@@ -1,6 +1,9 @@
 <?php
 namespace Rumd3x\Ftp;
 
+use Closure;
+use Exception;
+
 class FtpFile {
 
     private $ftp;
@@ -16,12 +19,36 @@ class FtpFile {
         if (!empty($contents)) $this->contents = $contents;
     }
 
-    public function download($filename = false) {
+    public function download($filename = false, $async = false, $async) {
+        if (is_object($async) && ($async instanceof Closure)) {
+            $retorno = $this->downloadAsync($async, $filename);
+        } else {
+            $retorno = $this->downloadNormal($filename);
+        }
+        return $retorno;
+    }
+    
+    private function downloadNormal($filename = false) {
         $this->local_file = $filename ?: ($this->local_file ?: $this->name);
         $download = ftp_get($this->ftp->getStream(), $this->local_file, $this->name, FTP_ASCII);
         if ($download) {
             $this->contents = file_get_contents($this->local_file, FILE_TEXT);
         }        
+        return $this;
+    }
+    
+    private function downloadAsync($callback, $filename = false) {
+        $this->local_file = $filename ?: ($this->local_file ?: $this->name);        
+        $file_piece = ftp_nb_get($this->ftp->getStream(), $this->local_file, $this->name, FTP_ASCII);
+        while($file_piece == FTP_MOREDATA) {
+            $this->ftp->keepAlive();
+            $file_piece = ftp_nb_continue($this->ftp->getStream());
+            $callback();
+        }
+        if ($file_piece != FTP_FINISHED) {
+            throw new Exception("Failed to download. Try again.");
+        }
+        $this->contents = file_get_contents($this->local_file, FILE_TEXT);
         return $this;
     }
     
