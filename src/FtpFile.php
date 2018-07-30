@@ -19,7 +19,7 @@ class FtpFile {
         if (!empty($contents)) $this->contents = $contents;
     }
 
-    public function download($filename = false, $async = false, $async) {
+    public function download($filename = false, $async = false) {
         if (is_object($async) && ($async instanceof Closure)) {
             $retorno = $this->downloadAsync($async, $filename);
         } else {
