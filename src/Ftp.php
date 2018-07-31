@@ -97,7 +97,7 @@ class Ftp {
 	}
 	
 	public function keepAlive() {
-		$success = ftp_exec($this-getStream(), "NOOP");
+		$success = ftp_raw($this-getStream(), "NOOP");
 		if (!$success) {
 			$currentFolder = $this->currentFolder();
 			$this->disconnect();
