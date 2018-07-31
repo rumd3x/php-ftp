@@ -39,13 +39,22 @@ class FtpFile {
     
     private function downloadAsync($callback, $filename = false) {
         $this->local_file = $filename ?: ($this->local_file ?: $this->name);        
+        $ref_ts = microtime(true);
         $file_piece = ftp_nb_get($this->ftp->getStream(), $this->local_file, $this->name, FTP_ASCII);
-        while($file_piece == FTP_MOREDATA) {
-            $this->ftp->keepAlive();
-            $file_piece = ftp_nb_continue($this->ftp->getStream());
-            if (is_object($callback) && ($callback instanceof Closure)) $callback();
+        while($file_piece === FTP_MOREDATA) {
+            try {
+                if ((microtime(true) - $ref_ts) >= 30) {
+                    $this->ftp->keepAlive();
+                    $ref_ts = microtime(true);
+                }      
+            
+                $file_piece = ftp_nb_continue($this->ftp->getStream());
+            } finally {
+                continue;
+            }            
         }
-        if ($file_piece != FTP_FINISHED) {
+        if (is_object($callback) && ($callback instanceof Closure)) $callback($file_piece);
+        if ($file_piece !== FTP_FINISHED) {
             throw new Exception("Failed to download. Try again.");
         }
         $this->contents = file_get_contents($this->local_file, FILE_TEXT);
