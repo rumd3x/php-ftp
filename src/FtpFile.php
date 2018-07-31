@@ -20,7 +20,7 @@ class FtpFile {
     }
 
     public function download($filename = false, $async = false) {
-        if (is_object($async) && ($async instanceof Closure)) {
+        if ($async) {
             $retorno = $this->downloadAsync($async, $filename);
         } else {
             $retorno = $this->downloadNormal($filename);
@@ -43,7 +43,7 @@ class FtpFile {
         while($file_piece == FTP_MOREDATA) {
             $this->ftp->keepAlive();
             $file_piece = ftp_nb_continue($this->ftp->getStream());
-            $callback();
+            if (is_object($callback) && ($backk instanceof Closure)) $callback();
         }
         if ($file_piece != FTP_FINISHED) {
             throw new Exception("Failed to download. Try again.");
