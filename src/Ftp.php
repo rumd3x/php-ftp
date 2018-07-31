@@ -97,11 +97,14 @@ class Ftp {
 	}
 	
 	public function keepAlive() {
-		$currentFolder = $this->currentFolder();
-		$this->disconnect();
-		$this->connect();
-		$this->login();
-		$this->dir($currentFolder);
+		$success = ftp_exec($this-getStream(), "NOOP");
+		if (!$success) {
+			$currentFolder = $this->currentFolder();
+			$this->disconnect();
+			$this->connect();
+			$this->login();
+			$this->dir($currentFolder);
+		}		
 		return $this;
 	}
 
