@@ -97,8 +97,8 @@ class Ftp {
 	}
 	
 	public function keepAlive() {
-		$success = ftp_raw($this->getStream(), "NOOP");
-		if (!$success) {
+		$response = $this->executeRaw("NOOP");
+		if ($response->code >= 400) {
 			$currentFolder = $this->currentFolder();
 			$this->disconnect();
 			$this->connect();
@@ -111,6 +111,15 @@ class Ftp {
     public function isConnected() {
         return $this->connected;
     }
+	
+	public function executeRaw($command) {
+		$response = ftp_raw($this->getStream(), $command);
+		$code = intval(preg_replace('/\D/', '', $response));
+		$responseObject = new StdClass;
+		$responseObject->text = $response;
+		$responseObject->code = $code;
+		return $responseObject;
+	}
 
     public function getFiles($dir = ".") {
         if (!$this->isConnected()) {
