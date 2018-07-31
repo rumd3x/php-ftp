@@ -101,7 +101,7 @@ class Ftp {
 	
 	public function keepAlive() {
 		$response = $this->executeRaw("NOOP");
-		if ($response->code >= 400) {
+		if ($response->code >= 200 && $response->code <= 400) {
 			$currentFolder = $this->currentFolder();
 			$this->disconnect();
 			$this->connect();
@@ -116,7 +116,7 @@ class Ftp {
     }
 	
 	public function executeRaw($command) {
-		$response = ftp_raw($this->getStream(), trim($command));
+		$response = @ftp_raw($this->getStream(), trim($command));
 		$code = intval(preg_replace('/\D/', '', $response));
 		$responseObject = new StdClass;
 		$responseObject->text = $response;
