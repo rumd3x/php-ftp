@@ -94,6 +94,9 @@ class Ftp {
 	
 	public function disconnect() {
 		ftp_close($this->getStream());
+		$this->setStream(NULL);
+		$this->connected = false;
+		return $this;
 	}
 	
 	public function keepAlive() {
@@ -113,7 +116,7 @@ class Ftp {
     }
 	
 	public function executeRaw($command) {
-		$response = ftp_raw($this->getStream(), $command);
+		$response = ftp_raw($this->getStream(), trim($command));
 		$code = intval(preg_replace('/\D/', '', $response));
 		$responseObject = new StdClass;
 		$responseObject->text = $response;
