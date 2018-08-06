@@ -43,6 +43,8 @@ class FtpFile {
         $file_piece = ftp_nb_get($this->ftp->getStream(), $this->local_file, $this->name, FTP_ASCII);
         while($file_piece === FTP_MOREDATA) {
             try {
+                $continue = false;
+                
                 if ((microtime(true) - $ref_ts) >= 30) {
                     $this->ftp->keepAlive();
                     $ref_ts = microtime(true);
@@ -50,8 +52,9 @@ class FtpFile {
             
                 $file_piece = ftp_nb_continue($this->ftp->getStream());
             } finally {
-                continue;
-            }            
+                $continue = true;
+            } 
+            if ($continue) continue;
         }
         if (is_object($callback) && ($callback instanceof Closure)) $callback($file_piece);
         if ($file_piece !== FTP_FINISHED) {
