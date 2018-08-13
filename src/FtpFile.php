@@ -33,7 +33,7 @@ class FtpFile extends FtpObject {
     protected function downloadAsync($callback, $filename = false) {
         $this->local_file = $filename ?: ($this->local_file ?: $this->full_name);        
         $ref_ts = microtime(true);
-        $file_piece = ftp_nb_get($this->ftp->getStream(), $this->local_file, $this->full_name, FTP_BINARY);
+        $file_piece = @ftp_nb_get($this->ftp->getStream(), $this->local_file, $this->full_name, FTP_BINARY);
         while($file_piece === FTP_MOREDATA) {
             try {
                 $continue = false;
@@ -43,7 +43,7 @@ class FtpFile extends FtpObject {
                     $ref_ts = microtime(true);
                 }      
             
-                $file_piece = ftp_nb_continue($this->ftp->getStream());
+                $file_piece = @ftp_nb_continue($this->ftp->getStream());
             } finally {
                 $continue = true;
             } 
