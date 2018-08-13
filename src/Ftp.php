@@ -3,10 +3,11 @@ namespace Rumd3x\Ftp;
 
 use StdClass;
 use Exception;
-use DateTime;
-use DateTimeZone;
+use Carbon\Carbon;
 
-class Ftp {
+use Rumd3x\BaseObject\BaseObject;
+
+class Ftp extends BaseObject {
 
     private $host;
     private $user;
@@ -122,38 +123,102 @@ class Ftp {
 		$responseObject->text = $response;
 		$responseObject->code = $code;
 		return $responseObject;
-	}
+    }
+    
+    public function getAll() {
+        $dirs = $this->getFolders();
+        $files = $this->getFiles();
+        return array_merge($dirs, $files);
+    }
 
-    public function getFiles($dir = ".") {
+    private function getRawList() {
         if (!$this->isConnected()) {
             $this->connect();
             $this->login();
         }
-
-        if (@!ftp_chdir($this->getStream(), $dir)) {
-            return [];
+        $ftp_rawlist = ftp_rawlist($this->getStream(), ".");
+        $rawlist = [];
+        foreach ($ftp_rawlist as $v) {
+          $info = array();
+          $vinfo = preg_split("/[\s]+/", $v, 9);
+          if ($vinfo[0] !== "total") {
+            $info['chmod'] = $vinfo[0];
+            $info['num'] = $vinfo[1];
+            $info['owner'] = $vinfo[2];
+            $info['group'] = $vinfo[3];
+            $info['size'] = $vinfo[4];
+            $info['month'] = $vinfo[5];
+            $info['day'] = $vinfo[6];
+            $info['time'] = $vinfo[7];
+            $info['name'] = $vinfo[8];
+            $rawlist[$info['name']] = $info;
+          }
         }
+        return $rawlist;
+    }
 
-        $filenames_arr = ftp_nlist($this->getStream(), ".");
-        $files_arr = [];
-        foreach($filenames_arr as $filename) {
-            $timestamp = new DateTime();
-            $timestamp->setTimestamp(ftp_mdtm($this->getStream(), $filename));
-            $timestamp->setTimezone(new DateTimeZone('America/Sao_Paulo'));
-
-            $file = new FtpFile;
-            $file->setFtp($this);
-            $file->name = $filename;
-            $file->timestamp = $timestamp;
-            $files_arr[] = $file;
+    public function getFiles() {   
+        $file = array();
+        $currentFolder = $this->currentFolder();
+        foreach ($this->getRawList() as $k => $v) {
+          if ($v['chmod']{0} !== "d" && $v['chmod']{0} === "-") {
+            $file[$k] = $v;
+          }
         }
-        return $files_arr;         
+        $files = [];
+        foreach ($file as $filename => $fileinfo) {
+            $this_file = new FtpFile($this, $filename);
+            $this_file->full_name = "{$currentFolder}/{$filename}";
+            $this_file->permission = $fileinfo['chmod'];
+            $this_file->owner = $fileinfo['owner'];
+            $this_file->group = $fileinfo['group'];
+            $this_file->size = $fileinfo['size'];
+            $this_file->setFtp($this);
+            $timestamp = ftp_mdtm($this->getStream(), $this_file->name);
+            $this_file->timestamp = Carbon::createFromTimestamp($timestamp);
+            $files[] = $this_file;
+        }
+        return $files;
+    }
+
+    public function getFolders() {
+        $dir = array();
+        $currentFolder = $this->currentFolder();
+        foreach ($this->getRawList() as $k => $v) {
+          if ($v['chmod']{0} === "d") {
+            $dir[$k] = $v;
+          }
+        }
+        $dirs = []; 
+        foreach ($dir as $dirname => $dirinfo) {
+            $this_dir = new FtpFolder($this, $dirname);
+            $this_dir->full_name = "{$currentFolder}/{$dirname}";            
+            $this_dir->permission = $dirinfo['chmod'];
+            $this_dir->owner = $dirinfo['owner'];
+            $this_dir->group = $dirinfo['group'];
+            $timestamp = ftp_mdtm($this->getStream(), $this_dir->name);
+            $this_dir->timestamp = Carbon::createFromTimestamp($timestamp);
+            $this_dir->setFtp($this);
+            $dirs[] = $this_dir;
+        }
+        return $dirs;
+    }
+
+    public function getFolder($name) {
+        $retorno = NULL;
+        foreach($this->getFolders() as $folder) {
+            if (strpos($folder->full_name, $name) !== false) {
+                $retorno = $folder;
+                break;
+            }
+        }
+        return $retorno;
     }
 
     public function getFile($name) {
         $retorno = NULL;
         foreach($this->getFiles() as $file) {
-            if (strpos($file->name, $name) !== false) {
+            if (strpos($file->full_name, $name) !== false) {
                 $retorno = $file;
                 break;
             }

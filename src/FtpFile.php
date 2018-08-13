@@ -4,20 +4,13 @@ namespace Rumd3x\Ftp;
 use Closure;
 use Exception;
 
-class FtpFile {
+class FtpFile extends FtpObject {
 
-    private $ftp;
-    private $contents;
-    private $local_file;
-    private $downloaded = false;
+    protected $contents;
+    protected $local_file;
+    protected $downloaded = false;
 
-    public $name;
-    public $timestamp;
-
-    public function __construct($name = NULL, $contents = NULL) {
-        if (!empty($name)) $this->name = $name;
-        if (!empty($contents)) $this->contents = $contents;
-    }
+    public $size;
 
     public function download($filename = false, $async = false) {
         if ($async) {
@@ -28,19 +21,19 @@ class FtpFile {
         return $retorno;
     }
     
-    private function downloadNormal($filename = false) {
-        $this->local_file = $filename ?: ($this->local_file ?: $this->name);
-        $download = ftp_get($this->ftp->getStream(), $this->local_file, $this->name, FTP_ASCII);
+    protected function downloadNormal($filename = false) {
+        $this->local_file = $filename ?: ($this->local_file ?: $this->full_name);
+        $download = ftp_get($this->ftp->getStream(), $this->local_file, $this->full_name, FTP_BINARY);
         if ($download) {
-            $this->contents = file_get_contents($this->local_file, FILE_TEXT);
+            $this->contents = file_get_contents($this->local_file, FILE_BINARY);
         }        
         return $this;
     }
     
-    private function downloadAsync($callback, $filename = false) {
-        $this->local_file = $filename ?: ($this->local_file ?: $this->name);        
+    protected function downloadAsync($callback, $filename = false) {
+        $this->local_file = $filename ?: ($this->local_file ?: $this->full_name);        
         $ref_ts = microtime(true);
-        $file_piece = ftp_nb_get($this->ftp->getStream(), $this->local_file, $this->name, FTP_ASCII);
+        $file_piece = ftp_nb_get($this->ftp->getStream(), $this->local_file, $this->full_name, FTP_BINARY);
         while($file_piece === FTP_MOREDATA) {
             try {
                 $continue = false;
@@ -60,26 +53,21 @@ class FtpFile {
         if ($file_piece !== FTP_FINISHED) {
             throw new Exception("Failed to download. Try again.");
         }
-        $this->contents = file_get_contents($this->local_file, FILE_TEXT);
+        $this->contents = file_get_contents($this->local_file, FILE_BINARY);
         return $this;
     }
     
     public function upload($filename = false) {
-        if (!empty($this->name)) {
-            $this->local_file = $filename ?: ($this->local_file ?: $this->name);
-            file_put_contents($this->local_file, $this->contents, FILE_TEXT);
-            ftp_put($this->ftp->getStream(), $this->name, $this->local_file, FTP_ASCII);
+        if (!empty($this->full_name)) {
+            $this->local_file = $filename ?: ($this->local_file ?: $this->full_name);
+            file_put_contents($this->local_file, $this->contents, FILE_BINARY);
+            ftp_put($this->ftp->getStream(), $this->full_name, $this->local_file, FTP_BINARY);
         }
         return $this;
     }
 
     public function delete() {
-        return @ftp_delete($this->ftp->getStream(), $this->name);
-    }
-
-    public function setFtp($ftp) {
-        $this->ftp = $ftp;
-        return $this;
+        return @ftp_delete($this->ftp->getStream(), $this->full_name);
     }
 
     public function getContents() {
