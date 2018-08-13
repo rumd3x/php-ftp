@@ -12,7 +12,9 @@
         }
     ],
     "require": {
-        "php": ">=5.5"
+        "php": ">=5.5",
+        "nesbot/carbon": "^1.33",
+        "rumd3x/php-baseobject": "*"
     },
     "autoload": {
         "psr-4": {
@@ -23,5 +25,10 @@
         "branch-alias": {
             "dev-master": "master"
         }
-    }
+    }, 
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "repositories": [
+        { "type": "git", "url": "https://github.com/rumd3x/php-baseobject.git" }
+    ]
 }
