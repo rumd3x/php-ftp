@@ -23,7 +23,7 @@ class FtpFile extends FtpObject {
     
     protected function downloadNormal($filename = false) {
         $this->local_file = $filename ?: ($this->local_file ?: $this->full_name);
-        $download = ftp_get($this->ftp->getStream(), $this->local_file, $this->full_name, FTP_BINARY);
+        $download = @ftp_get($this->ftp->getStream(), $this->local_file, $this->full_name, FTP_BINARY);
         if ($download) {
             $this->contents = file_get_contents($this->local_file, FILE_BINARY);
         }        
