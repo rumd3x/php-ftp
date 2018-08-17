@@ -16,6 +16,7 @@ class Ftp extends BaseObject {
 	private $secure = false;
 
     private $stream;
+	private $system;
     private $connected = false;
 
     public function __construct() {
@@ -79,8 +80,9 @@ class Ftp extends BaseObject {
 
 		if (empty($this->stream)) {
 			$is_ssl = $this->isSecure() ? 'com' : 'sem';
-	    throw new Exception("Não foi possível conectar ao host {$is_ssl} SSL \"{$this->host}\" usando a porta {$this->port}");
-	}
+			throw new Exception("Não foi possível conectar ao host {$is_ssl} SSL \"{$this->host}\" usando a porta {$this->port}");
+		}
+		$this->system = ftp_systype($this->stream);
 		return $this;
 	}
 
@@ -138,22 +140,44 @@ class Ftp extends BaseObject {
         }
         $ftp_rawlist = ftp_rawlist($this->getStream(), ".");
         $rawlist = [];
-        foreach ($ftp_rawlist as $v) {
-          $info = array();
-          $vinfo = preg_split("/[\s]+/", $v, 9);
-          if ($vinfo[0] !== "total") {
-            $info['chmod'] = @$vinfo[0];
-            $info['num'] = @$vinfo[1];
-            $info['owner'] = @$vinfo[2];
-            $info['group'] = @$vinfo[3];
-            $info['size'] = @$vinfo[4];
-            $info['month'] = @$vinfo[5];
-            $info['day'] = @$vinfo[6];
-            $info['time'] = @$vinfo[7];
-            $info['name'] = @$vinfo[8];
-            $rawlist[$info['name']] = $info;
-          }
-        }
+		if (strtoupper($this->system) !== strtoupper("Windows_NT")) {
+			foreach ($ftp_rawlist as $v) {
+			  $info = array();
+			  $vinfo = preg_split("/[\s]+/", $v, 9);
+			  if ($vinfo[0] !== "total") {
+				$info['chmod'] = $vinfo[0];
+				$info['num'] = $vinfo[1];
+				$info['owner'] = $vinfo[2];
+				$info['group'] = $vinfo[3];
+				$info['size'] = $vinfo[4];
+				$info['month'] = $vinfo[5];
+				$info['day'] = $vinfo[6];
+				$info['time'] = $vinfo[7];
+				$info['name'] = $vinfo[8];
+				$rawlist[$info['name']] = $info;
+			  }
+			}
+		} else {
+			foreach ($ftp_rawlist as $v) {
+				$split = false;
+				ereg("([0-9]{2})-([0-9]{2})-([0-9]{2}) +([0-9]{2}):([0-9]{2})(AM|PM) +([0-9]+|<DIR>) +(.+)", $v, $split);
+				if (is_array($split)) {
+					$parsed = [];
+					$split[3] = $split[3]<70 ? $split[3]+=2000; : $split[3]+=1900; // 4digit year fix
+					$parsed['chmod'] = $split[7]=="<DIR>" ? "d" : "";
+					$parsed['num'] = "";
+					$parsed['group'] = "";
+					$parsed['owner'] = "";
+					$parsed['size'] = $split[7];
+					$parsed['month'] = $split[1];
+					$parsed['day'] = $split[2];
+					$parsed['time'] = $split[3];
+					$parsed['name'] = $split[8];
+					$rawlist[$parsed['name']] = $parsed;
+				 }
+			}			
+		}
+        
         return $rawlist;
     }
 
