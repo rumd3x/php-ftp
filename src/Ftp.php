@@ -164,7 +164,7 @@ class Ftp extends BaseObject {
 				if (is_array($split)) {
 					$parsed = [];
 					$split[3] = $split[3]<70 ? $split[3]+=2000 : $split[3]+=1900; // 4digit year fix
-					$parsed['chmod'] = $split[7]=="<DIR>" ? "d" : "f";
+					$parsed['chmod'] = $split[7]=="<DIR>" ? "d" : "-";
 					$parsed['num'] = "";
 					$parsed['group'] = "";
 					$parsed['owner'] = "";
@@ -185,7 +185,7 @@ class Ftp extends BaseObject {
         $file = array();
         $currentFolder = $this->currentFolder();
         foreach ($this->getRawList() as $k => $v) {
-          if ($v['chmod']{0} !== "d" && $v['chmod']{0} === "-") {
+          if ($v['chmod']{0} === "-") {
             $file[$k] = $v;
           }
         }
