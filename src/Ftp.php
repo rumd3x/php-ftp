@@ -142,15 +142,15 @@ class Ftp extends BaseObject {
           $info = array();
           $vinfo = preg_split("/[\s]+/", $v, 9);
           if ($vinfo[0] !== "total") {
-            $info['chmod'] = $vinfo[0];
-            $info['num'] = $vinfo[1];
-            $info['owner'] = $vinfo[2];
-            $info['group'] = $vinfo[3];
-            $info['size'] = $vinfo[4];
-            $info['month'] = $vinfo[5];
-            $info['day'] = $vinfo[6];
-            $info['time'] = $vinfo[7];
-            $info['name'] = $vinfo[8];
+            $info['chmod'] = @$vinfo[0];
+            $info['num'] = @$vinfo[1];
+            $info['owner'] = @$vinfo[2];
+            $info['group'] = @$vinfo[3];
+            $info['size'] = @$vinfo[4];
+            $info['month'] = @$vinfo[5];
+            $info['day'] = @$vinfo[6];
+            $info['time'] = @$vinfo[7];
+            $info['name'] = @$vinfo[8];
             $rawlist[$info['name']] = $info;
           }
         }
