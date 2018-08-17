@@ -36,18 +36,23 @@ class FtpFile extends FtpObject {
         $file_piece = @ftp_nb_get($this->ftp->getStream(), $this->local_file, $this->full_name, FTP_BINARY);
         while($file_piece === FTP_MOREDATA) {
             try {
-                $continue = false;
-                
-                if ((microtime(true) - $ref_ts) >= 30) {
+                $this->ftp->connect();
+                $continue = false;                
+               
+                if ((microtime(true) - $ref_ts) >= 10) {
                     $this->ftp->keepAlive();
                     $ref_ts = microtime(true);
-                }      
+                }     
             
                 $file_piece = @ftp_nb_continue($this->ftp->getStream());
             } finally {
                 $continue = true;
             } 
-            if ($continue) continue;
+            
+            if ($continue)  {
+                $this->ftp->disconnect();
+                continue;
+            }
         }
         if (is_object($callback) && ($callback instanceof Closure)) $callback($file_piece);
         if ($file_piece !== FTP_FINISHED) {
