@@ -13,7 +13,7 @@ class FtpFile extends FtpObject {
     public $size;
 
     public function download($filename = false, $async = false) {
-        if ($async) {
+        if ($async !== false) {
             $retorno = $this->downloadAsync($async, $filename);
         } else {
             $retorno = $this->downloadNormal($filename);
