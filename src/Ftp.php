@@ -160,10 +160,10 @@ class Ftp extends BaseObject {
 		} else {
 			foreach ($ftp_rawlist as $v) {
 				$split = false;
-				ereg("([0-9]{2})-([0-9]{2})-([0-9]{2}) +([0-9]{2}):([0-9]{2})(AM|PM) +([0-9]+|<DIR>) +(.+)", $v, $split);
+				mb_ereg("([0-9]{2})-([0-9]{2})-([0-9]{2}) +([0-9]{2}):([0-9]{2})(AM|PM) +([0-9]+|<DIR>) +(.+)", $v, $split);
 				if (is_array($split)) {
 					$parsed = [];
-					$split[3] = $split[3]<70 ? $split[3]+=2000; : $split[3]+=1900; // 4digit year fix
+					$split[3] = $split[3]<70 ? $split[3]+=2000 : $split[3]+=1900; // 4digit year fix
 					$parsed['chmod'] = $split[7]=="<DIR>" ? "d" : "";
 					$parsed['num'] = "";
 					$parsed['group'] = "";
