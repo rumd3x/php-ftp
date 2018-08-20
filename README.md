@@ -7,9 +7,6 @@ To install via composer add this to your composer.json
 ```json
 "minimum-stability": "dev",
 "prefer-stable": true,
-"repositories": [
-	{ "type": "git", "url": "https://github.com/rumd3x/php-ftp.git" }
-]
 ```
 And then run
 ```sh
