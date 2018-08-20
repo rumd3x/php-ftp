@@ -21,11 +21,6 @@
             "Rumd3x\\Ftp\\": "src/"
         }
     },
-    "extra": {
-        "branch-alias": {
-            "master": "master-dev"
-        }
-    }, 
     "minimum-stability": "dev",
     "prefer-stable": true,
     "repositories": [
