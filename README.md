@@ -59,13 +59,19 @@ $dir = $ftp->up()->up()->currentFolder();
 
 You can also navigate through folders, create and delete using the FtpFolder Object.
 ```php
+//Connect to the FTP Server
 $ftp = new Rumd3x\Ftp\Ftp('host.example.com', 'user', 'pass', 21);
+
+//Create the folder 'FolderName' on your current dir
 $folder = new Rumd3x\Ftp\FtpFolder($ftp, 'FolderName');
+
 $folder->create()->navigateTo(); // creates the folder and navigates to it
+
 $folder_name = $folder->name; // name property of FtpFolder 
 $folder_full_name = $folder->full_name; // full_name property of FtpFolder 
 $folder_timestamp = $folder->timestamp; // timestamp property of FtpFolder 
 $folder_permission = $folder->permission; // permission property of FtpFolder 
+
 $ftp->up(); // navigates one level up
 $folder->delete(); // deletes the folder from the server
 ```
