@@ -47,7 +47,7 @@ print_r($conn3); // Returns a boolean;
 ### Handling directories
 You can navigate through folders and create new folders using methods built-in the connection.
 ```php
-$dir = $ftp->currentFolder(); 
+$dir = $ftp->currentFolder(); // gets the current folder you are in on the server 
 // $dir has "/"
 
 $dir = $ftp->createFolder('test/example/123')->dir('test')->dir('example/123')->currentFolder();
@@ -60,14 +60,14 @@ $dir = $ftp->up()->up()->currentFolder();
 You can also navigate through folders, create and delete using the FtpFolder Object.
 ```php
 $ftp = new Rumd3x\Ftp\Ftp('host.example.com', 'user', 'pass', 21);
-$folder = new Rumd3x\Ftp\FtpFolder($ftp);
-$folder->create()->navigateTo();
+$folder = new Rumd3x\Ftp\FtpFolder($ftp, 'FolderName');
+$folder->create()->navigateTo(); // creates the folder and navigates to it
 $folder_name = $folder->name; // name property of FtpFolder 
 $folder_full_name = $folder->full_name; // full_name property of FtpFolder 
 $folder_timestamp = $folder->timestamp; // timestamp property of FtpFolder 
 $folder_permission = $folder->permission; // permission property of FtpFolder 
-$ftp->up();
-$folder->delete();
+$ftp->up(); // navigates one level up
+$folder->delete(); // deletes the folder from the server
 ```
 
 To get the list of folders on your current directory:
