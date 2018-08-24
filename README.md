@@ -85,7 +85,9 @@ $folders = $ftp->getFolders(); // Outputs an array of Rumd3x\Ftp\FtpFolder
 Or to get the FtpFolder instance of a specific folder by its name:
 ```php
 $ftp = new Rumd3x\Ftp\Ftp('host.example.com', 'user', 'pass', 21);
-$folder = $ftp->getFolder('test'); // Outputs an instance of Rumd3x\Ftp\FtpFolder in case the folder exists
+
+$folder = $ftp->getFolder('test'); 
+// Outputs an instance of Rumd3x\Ftp\FtpFolder in case the folder with name 'test' exists
 ```
 
 ### Handling files 
