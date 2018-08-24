@@ -89,4 +89,4 @@ $folder = $ftp->getFolder('test'); // Outputs an instance of Rumd3x\Ftp\FtpFolde
 ```
 
 ### Handling files 
-To-do the documentation of this
+To-do the documentation of this part
