@@ -55,6 +55,13 @@ $return = $ftp->executeRaw("NOOP"); // Allows you to send a arbitrary commands t
 print_r($return); // Outputs a object with the response data
 ```
 
+To list everything in the current directory, simply:
+```php
+$files = $ftp->getAll(); 
+// Returns an array of mixed Directories and Files as instances of FtpFolder and FtpFile respectively
+// All directories comes first, then all the files
+```
+
 ### Handling directories
 You can navigate through folders and create new folders using methods built-in the connection.
 ```php
