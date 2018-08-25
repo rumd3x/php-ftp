@@ -44,6 +44,17 @@ $conn3 = $ftp3->isConnected();
 print_r($conn3); // Returns a boolean;
 ```
 
+### Other FTP Commands
+To keep the connection alive
+```php
+$ftp = new Rumd3x\Ftp\Ftp('host.example.com', 'user', 'pass', 21);
+$ftp->keepAlive(); // Sends NOOP to the server to keep the connection alive
+
+$return = $ftp->executeRaw("NOOP"); // Allows you to send a arbitrary commands to the server 
+
+print_r($return); // Outputs a object with the response data
+```
+
 ### Handling directories
 You can navigate through folders and create new folders using methods built-in the connection.
 ```php
@@ -84,11 +95,49 @@ $folders = $ftp->getFolders(); // Outputs an array of Rumd3x\Ftp\FtpFolder
 
 Or to get the FtpFolder instance of a specific folder by its name:
 ```php
-$ftp = new Rumd3x\Ftp\Ftp('host.example.com', 'user', 'pass', 21);
-
 $folder = $ftp->getFolder('test'); 
-// Outputs an instance of Rumd3x\Ftp\FtpFolder in case the folder with name 'test' exists
+// Outputs an instance of Rumd3x\Ftp\FtpFolder in case the folder with name 'test' exists in the current directory
 ```
 
 ### Handling files 
-To-do the documentation of this part
+
+To get the list of files on your current directory:
+```php
+$ftp = new Rumd3x\Ftp\Ftp('host.example.com', 'user', 'pass', 21);
+$folders = $ftp->getFiles(); // Outputs an array of Rumd3x\Ftp\FtpFile
+```
+Or to get the FtpFile instance of a specific file by its name:
+```php
+$file = $ftp->getFolder('file.txt'); 
+// Outputs an instance of Rumd3x\Ftp\FtpFile in case the folder with name 'file.txt' exists in the current directory
+```
+
+#### Downloading
+
+To download a file on the server simply
+```php
+$local_file = '/tmp/file.txt';
+$file->download($local_file); // Will download the file to the local file path
+```
+
+For large files you can also make async downloads by passing a second parameter
+```php
+$local_file = '/tmp/file.txt';
+$file->download($local_file, true); // Will download the file asynchronously to the local file path 
+```
+
+You can also pass a callback to be executed on the download completion.
+```php
+$local_file = '/tmp/file.txt';
+
+// Will also download the file asynchronously to the local file path 
+$file->download($local_file, function($status) {
+  if ($status === FTP_FINISHED) {
+    echo 'Download success.';
+  } elseif ($status === FTP_FAILED) {
+    echo 'Download failed.';
+  } else {
+    echo 'Something else happened.';
+  }
+}); 
+```
