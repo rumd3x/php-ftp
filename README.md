@@ -58,7 +58,7 @@ print_r($return); // Outputs a object with the response data
 ### Handling directories
 You can navigate through folders and create new folders using methods built-in the connection.
 ```php
-$dir = $ftp->currentFolder(); // gets the current folder you are in on the server 
+$dir = $ftp->currentFolder(); // gets the current folder directory you are in on the server 
 // $dir has "/"
 
 $dir = $ftp->createFolder('test/example/123')->dir('test')->dir('example/123')->currentFolder();
@@ -66,25 +66,6 @@ $dir = $ftp->createFolder('test/example/123')->dir('test')->dir('example/123')->
 
 $dir = $ftp->up()->up()->currentFolder();
 // $dir now has "/test"
-```
-
-You can also navigate through folders, create and delete using the FtpFolder Object.
-```php
-//Connect to the FTP Server
-$ftp = new Rumd3x\Ftp\Ftp('host.example.com', 'user', 'pass', 21);
-
-//Create the folder 'FolderName' on your current dir
-$folder = new Rumd3x\Ftp\FtpFolder($ftp, 'FolderName');
-
-$folder->create()->navigateTo(); // creates the folder and navigates to it
-
-$folder_name = $folder->name; // name property of FtpFolder 
-$folder_full_name = $folder->full_name; // full_name property of FtpFolder 
-$folder_timestamp = $folder->timestamp; // timestamp property of FtpFolder 
-$folder_permission = $folder->permission; // permission property of FtpFolder 
-
-$ftp->up(); // navigates one level up
-$folder->delete(); // deletes the folder from the server
 ```
 
 To get the list of folders on your current directory:
@@ -97,6 +78,26 @@ Or to get the FtpFolder instance of a specific folder by its name:
 ```php
 $folder = $ftp->getFolder('test'); 
 // Outputs an instance of Rumd3x\Ftp\FtpFolder in case the folder with name 'test' exists in the current directory
+
+$folder_name = $folder->name; // name property of FtpFolder 
+$folder_full_name = $folder->full_name; // full_name property of FtpFolder 
+$folder_timestamp = $folder->timestamp; // timestamp property of FtpFolder 
+$folder_permission = $folder->permission; // permission property of FtpFolder 
+```
+
+#### Creating and Deleting Directories
+
+You can also navigate through folders, create and delete using the FtpFolder Object.
+```php
+//Connect to the FTP Server
+$ftp = new Rumd3x\Ftp\Ftp('host.example.com', 'user', 'pass', 21);
+
+//Create the folder 'FolderName' on your current dir
+$folder = new Rumd3x\Ftp\FtpFolder($ftp, 'FolderName');
+
+$folder->create()->navigateTo(); // creates the folder and navigates to it
+$ftp->up(); // navigates one level up
+$folder->delete(); // deletes the folder from the server
 ```
 
 ### Handling files 
@@ -108,11 +109,27 @@ $folders = $ftp->getFiles(); // Outputs an array of Rumd3x\Ftp\FtpFile
 ```
 Or to get the FtpFile instance of a specific file by its name:
 ```php
-$file = $ftp->getFolder('file.txt'); 
 // Outputs an instance of Rumd3x\Ftp\FtpFile in case the folder with name 'file.txt' exists in the current directory
+$file = $ftp->getFolder('file.txt'); 
+
+// File properties
+$file_name = $file->name; // name property of FtpFile
+$file_full_name = $file->full_name; // full_name property of FtpFile
+$file_timestamp = $file->timestamp; // timestamp property of FtpFile
+$file_permission = $file->permission; // permission property of FtpFile
 ```
 
-#### Downloading
+To read the contents of a file on the server simply
+```php
+$file->getContents(); // Returns a string with the file contents
+```
+
+To remove a file from the server simply
+```php
+$file->delete(); // Returns a boolean with the success flag
+```
+
+#### Downloading Files
 
 To download a file on the server simply
 ```php
@@ -140,4 +157,24 @@ $file->download($local_file, function($status) {
     echo 'Something else happened.';
   }
 }); 
+```
+
+#### Editing Files
+```php
+$contents = 'new file contents';
+$file->setContents($contents);
+$file->upload();
+```
+
+#### Creating new Files
+```php
+$ftp = new Rumd3x\Ftp\Ftp('host.example.com', 'user', 'pass', 21);
+
+$local_file = '/etc/file.txt';
+$contents = file_get_contents($local_file);
+
+//Create the file 'file.txt' on your current dir
+$file = new Rumd3x\Ftp\FtpFile($ftp, 'file.txt');
+$file->setContents($contents);
+$file->upload();
 ```
