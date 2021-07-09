@@ -82,7 +82,7 @@ class Ftp extends BaseObject {
 			$is_ssl = $this->isSecure() ? 'com' : 'sem';
 			throw new Exception("Não foi possível conectar ao host {$is_ssl} SSL \"{$this->host}\" usando a porta {$this->port}");
 		}
-		$this->system = ftp_systype($this->stream);
+		$this->system = @ftp_systype($this->stream);
 		return $this;
 	}
 
@@ -92,6 +92,7 @@ class Ftp extends BaseObject {
             throw new Exception("Usuário ou senha inválidos");
         }
         ftp_pasv($this->stream, true);
+        $this->system = @ftp_systype($this->stream);
         return $this;
     }
 	
