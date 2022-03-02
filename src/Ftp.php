@@ -26,7 +26,7 @@ class Ftp extends BaseObject {
         if (func_num_args() > 1) {
             $this->parseConnectionDetails($args);           
         } elseif (func_num_args() === 1 && (is_array($args[0]) || is_object(is_array($args[0])))) {
-            if (array_keys($arr) !== range(0, count($arr) - 1)) {
+            if (array_keys($args) !== range(0, count($args) - 1)) {
                 $data = (Array) $args[0];
                 $this->host = $data['host'];
                 $this->user = $data['user'];
@@ -165,7 +165,7 @@ class Ftp extends BaseObject {
 				if (is_array($split)) {
 					$parsed = [];
 					$split[3] = $split[3]<70 ? $split[3]+=2000 : $split[3]+=1900; // 4digit year fix
-					$parsed['chmod'] = $split[7]=="<DIR>" ? "d" : "-";
+					$parsed['chmod'] = $split[7]==="<DIR>" ? "d" : "-";
 					$parsed['num'] = "";
 					$parsed['group'] = "";
 					$parsed['owner'] = "";
@@ -186,7 +186,7 @@ class Ftp extends BaseObject {
         $file = array();
         $currentFolder = $this->currentFolder();
         foreach ($this->getRawList() as $k => $v) {
-          if ($v['chmod']{0} === "-") {
+          if ($v['chmod'][0] === "-") {
             $file[$k] = $v;
           }
         }
@@ -210,7 +210,7 @@ class Ftp extends BaseObject {
         $dir = array();
         $currentFolder = $this->currentFolder();
         foreach ($this->getRawList() as $k => $v) {
-          if ($v['chmod']{0} === "d") {
+          if ($v['chmod'][0] === "d") {
             $dir[$k] = $v;
           }
         }

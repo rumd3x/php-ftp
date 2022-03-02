@@ -13,6 +13,7 @@
     ],
     "require": {
         "php": ">=5.5",
+        "ext-mbstring": "*",
         "nesbot/carbon": "^1.33",
         "rumd3x/php-baseobject": "*"
     },
